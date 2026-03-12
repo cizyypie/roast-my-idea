@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoastBot 3000 🔥</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Variables ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: #2a2a2a;
+      --fire: #ff4500;
+      --fire2: #ff7b00;
+      --fire3: #ffcc00;
+      --green: #00e676;
+      --red: #ff1744;
+      --text: #f0f0f0;
+      --muted: #666;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background Grain ──────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Layout ────────────────────────────────────────── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Header ────────────────────────────────────────── */
+    header {
+      text-align: center;
+      padding: 60px 20px 40px;
+      position: relative;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: var(--fire);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,69,0,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(255,69,0,0); }
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(56px, 10vw, 100px);
+      letter-spacing: 3px;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--fire) 0%, var(--fire2) 50%, var(--fire3) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 40px rgba(255,69,0,0.3));
+    }
+
+    .subtitle {
+      margin-top: 16px;
+      font-size: 15px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      font-weight: 300;
+    }
+
+    /* ── Input Area ────────────────────────────────────── */
+    .input-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 28px;
+      transition: border-color 0.3s;
+    }
+    .input-section:focus-within {
+      border-color: var(--fire);
+      box-shadow: 0 0 0 1px var(--fire), 0 0 30px rgba(255,69,0,0.1);
+    }
+
+    .input-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      letter-spacing: 2px;
+      color: var(--fire2);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.6;
+      resize: none;
+      min-height: 80px;
+    }
+    textarea::placeholder { color: #3a3a3a; }
+
+    .input-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .char-count {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    .btn-roast {
+      background: linear-gradient(135deg, var(--fire), var(--fire2));
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      font-family: var(--font-display);
+      font-size: 20px;
+      letter-spacing: 2px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-roast::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-roast:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,69,0,0.4); }
+    .btn-roast:hover::after { opacity: 0.08; }
+    .btn-roast:active { transform: translateY(0); }
+    .btn-roast:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Loading ───────────────────────────────────────── */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 48px;
+    }
+    .loading.active { display: block; }
+    .flame-loader {
+      font-size: 40px;
+      animation: flame-dance 0.8s ease-in-out infinite alternate;
+      display: inline-block;
+    }
+    @keyframes flame-dance {
+      from { transform: scale(1) rotate(-5deg); filter: hue-rotate(0deg); }
+      to { transform: scale(1.2) rotate(5deg); filter: hue-rotate(20deg); }
+    }
+    .loading-text {
+      margin-top: 16px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    /* ── Result Card ───────────────────────────────────── */
+    .result-card {
+      display: none;
+      animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .result-card.active { display: block; }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Score Banner */
+    .score-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+      padding: 28px 28px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .score-number {
+      font-family: var(--font-display);
+      font-size: 80px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--fire), var(--fire3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .score-info { flex: 1; }
+    .score-label {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: var(--fire2);
+      line-height: 1;
+    }
+    .score-idea {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .share-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .share-btn:hover { border-color: var(--fire); color: var(--fire); }
+
+    /* Roast Text */
+    .roast-main {
+      background: linear-gradient(135deg, rgba(255,69,0,0.08), rgba(255,123,0,0.05));
+      border: 1px solid rgba(255,69,0,0.2);
+      border-top: 3px solid var(--fire);
+      padding: 24px 28px;
+    }
+
+    .roast-quote {
+      font-size: 17px;
+      line-height: 1.7;
+      font-weight: 400;
+      color: #ddd;
+      font-style: italic;
+    }
+    .roast-quote::before { content: '"'; font-size: 40px; color: var(--fire); line-height: 0; vertical-align: -12px; margin-right: 4px; font-style: normal; }
+    .roast-quote::after { content: '"'; font-size: 40px; color: var(--fire); line-height: 0; vertical-align: -12px; margin-left: 4px; font-style: normal; }
+
+    /* Grid Section */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      padding: 22px 24px;
+    }
+    .panel:nth-child(2) { border-left: none; }
+
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title.green { color: var(--green); }
+    .panel-title.red { color: var(--red); }
+
+    .panel ul { list-style: none; }
+    .panel ul li {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #bbb;
+      padding: 5px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+    .panel ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--muted);
+    }
+
+    /* Competitors */
+    .competitors-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      padding: 22px 24px;
+    }
+
+    .competitor-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .competitor-item:last-child { border-bottom: none; }
+
+    .competitor-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--fire2);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .competitor-name {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .competitor-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .competitor-url {
+      font-size: 11px;
+      color: var(--fire2);
+      font-family: var(--font-mono);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .competitor-url:hover { color: var(--fire3); text-decoration: underline; }
+
+    /* Survival Tip */
+    .survival-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-top: none;
+      padding: 22px 24px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .survival-icon { font-size: 28px; flex-shrink: 0; }
+    .survival-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--fire2);
+      margin-bottom: 8px;
+    }
+    .survival-text { font-size: 14px; line-height: 1.6; color: #ccc; }
+
+    /* Verdict */
+    .verdict-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 20px 28px;
+      text-align: center;
+      font-size: 15px;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .verdict-panel strong { color: var(--text); font-style: normal; }
+
+    /* ── Chat Follow-up ────────────────────────────────── */
+    .chat-section {
+      margin-top: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: none;
+    }
+    .chat-section.active { display: block; animation: slide-up 0.4s ease; }
+
+    .chat-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chat-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 1.5s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .chat-messages {
+      padding: 16px 24px;
+      max-height: 320px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-msg {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      animation: msg-in 0.3s ease;
+    }
+    @keyframes msg-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-msg.user {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      align-self: flex-end;
+      color: var(--text);
+    }
+    .chat-msg.bot {
+      background: linear-gradient(135deg, rgba(255,69,0,0.1), rgba(255,123,0,0.07));
+      border: 1px solid rgba(255,69,0,0.15);
+      align-self: flex-start;
+      color: #ddd;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 14px 20px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+    }
+    .chat-input::placeholder { color: #3a3a3a; }
+
+    .chat-send {
+      background: var(--fire);
+      border: none;
+      color: white;
+      padding: 14px 20px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .chat-send:hover { background: var(--fire2); }
+    .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Reset Button ──────────────────────────────────── */
+    .btn-reset {
+      display: none;
+      margin: 20px auto 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reset.active { display: block; }
+    .btn-reset:hover { border-color: var(--text); color: var(--text); }
+
+    /* ── Toast ─────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a1a;
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Scrollbar ─────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Footer ────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 40px 0 20px;
+      font-size: 12px;
+      color: #333;
+      font-family: var(--font-mono);
+    }
+
+    /* ── Responsive ────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .panel:nth-child(2) { border-left: 1px solid var(--border); border-top: none; }
+      .score-banner { flex-direction: column; align-items: flex-start; }
+      .score-number { font-size: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header>
+    <div class="header-badge">⚡ Powered by Gemini AI</div>
+    <h1>ROASTBOT<br>3000</h1>
+    <p class="subtitle">Pitch your startup idea. We'll tell you why it'll fail — and how to fix it.</p>
+  </header>
+
+  <!-- Input -->
+  <div class="input-section">
+    <span class="input-label">💡 Drop your idea here</span>
+    <textarea id="ideaInput" placeholder="e.g. An app that reminds you to drink water using AI and blockchain..." maxlength="500" rows="3"></textarea>
+    <div class="input-footer">
+      <span class="char-count"><span id="charCount">0</span> / 500</span>
+      <button class="btn-roast" id="roastBtn" onclick="roastIdea()">🔥 ROAST IT</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="flame-loader">🔥</div>
+    <div class="loading-text">RoastBot is analyzing your idea...<br>Preparing the devastation...</div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-card" id="resultCard">
+
+    <!-- Score Banner -->
+    <div class="score-banner">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="score-number" id="scoreNum">0</div>
+        <div class="score-info">
+          <div class="score-label" id="scoreLabel">—</div>
+          <div class="score-idea" id="scoreIdea"></div>
+        </div>
+      </div>
+      <button class="share-btn" onclick="shareRoast()">
+        <span>📋</span> Copy Roast
+      </button>
+    </div>
+
+    <!-- Main Roast -->
+    <div class="roast-main">
+      <div class="roast-quote" id="roastText"></div>
+    </div>
+
+    <!-- Strengths & Weaknesses -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title green">✅ Strengths</div>
+        <ul id="strengthsList"></ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title red">❌ Weaknesses</div>
+        <ul id="weaknessesList"></ul>
+      </div>
+    </div>
+
+    <!-- Competitors -->
+    <div class="competitors-panel">
+      <div class="panel-title" style="color: var(--fire2);">⚔️ &nbsp; Who'll Eat Your Lunch</div>
+      <div id="competitorsList"></div>
+    </div>
+
+    <!-- Survival Tip -->
+    <div class="survival-panel">
+      <div class="survival-icon">🧠</div>
+      <div>
+        <div class="survival-title">Survival Tip</div>
+        <div class="survival-text" id="survivalTip"></div>
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict-panel" id="verdictText"></div>
+
+  </div>
+
+  <!-- Chat Follow-up -->
+  <div class="chat-section" id="chatSection">
+    <div class="chat-header">
+      <div class="chat-dot"></div>
+      Ask RoastBot anything about your idea
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Push back, ask for advice, beg for mercy..." onkeydown="if(event.key==='Enter') sendFollowup()" />
+      <button class="chat-send" id="chatSendBtn" onclick="sendFollowup()">➤</button>
+    </div>
+  </div>
+
+  <button class="btn-reset" id="resetBtn" onclick="resetAll()">↩ Roast another idea</button>
+
+  <footer>RoastBot 3000 — Built with Node.js + Express + Gemini AI 🔥</footer>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = 'http://localhost:3000/api';
+  let currentIdea = '';
+  let conversationHistory = [];
+  let currentResult = null;
+
+  // Char counter
+  document.getElementById('ideaInput').addEventListener('input', function() {
+    document.getElementById('charCount').textContent = this.value.length;
+  });
+
+  // ── Roast ──────────────────────────────────────────────
+  async function roastIdea() {
+    const idea = document.getElementById('ideaInput').value.trim();
+    if (!idea) return showToast('⚠️ Enter an idea first!');
+
+    currentIdea = idea;
+    conversationHistory = [];
+
+    setLoading(true);
+    document.getElementById('resultCard').classList.remove('active');
+    document.getElementById('chatSection').classList.remove('active');
+    document.getElementById('resetBtn').classList.remove('active');
+
+    try {
+      const res = await fetch(`${API_BASE}/roast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Server error');
+
+      displayResult(data.result, idea);
+
+      // Seed conversation history for follow-up
+      conversationHistory = [
+        { role: 'user', content: `Roast this idea: "${idea}"` },
+        { role: 'model', content: JSON.stringify(data.result) }
+      ];
+
+    } catch (err) {
+      showToast('❌ ' + (err.message || 'Failed to connect to server'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── Display Result ─────────────────────────────────────
+  function displayResult(r, idea) {
+    currentResult = r;
+
+    // Score
+    document.getElementById('scoreNum').textContent = r.score + '/10';
+    document.getElementById('scoreLabel').textContent = r.score_label;
+    document.getElementById('scoreIdea').textContent = `"${idea}"`;
+
+    // Roast
+    document.getElementById('roastText').textContent = r.roast;
+
+    // Strengths
+    document.getElementById('strengthsList').innerHTML = r.strengths
+      .map(s => `<li>${s}</li>`).join('');
+
+    // Weaknesses
+    document.getElementById('weaknessesList').innerHTML = r.weaknesses
+      .map(w => `<li>${w}</li>`).join('');
+
+    // Competitors
+    document.getElementById('competitorsList').innerHTML = (r.competitors || [])
+      .map(c => `
+        <div class="competitor-item">
+          <div class="competitor-dot"></div>
+          <div>
+            <div class="competitor-name">${c.name}</div>
+            <div class="competitor-note">${c.note}</div>
+            <a class="competitor-url" href="${c.url}" target="_blank" rel="noopener">${c.url}</a>
+          </div>
+        </div>
+      `).join('');
+
+    // Survival tip
+    document.getElementById('survivalTip').textContent = r.survival_tip;
+
+    // Verdict
+    document.getElementById('verdictText').innerHTML = `<strong>Final Verdict:</strong> ${r.verdict}`;
+
+    document.getElementById('resultCard').classList.add('active');
+    document.getElementById('chatSection').classList.add('active');
+    document.getElementById('resetBtn').classList.add('active');
+    document.getElementById('chatMessages').innerHTML = '';
+
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Chat Follow-up ─────────────────────────────────────
+  async function sendFollowup() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    addChatMsg('user', message);
+    input.value = '';
+    document.getElementById('chatSendBtn').disabled = true;
+
+    conversationHistory.push({ role: 'user', content: message });
+
+    try {
+      const res = await fetch(`${API_BASE}/followup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          conversation_history: conversationHistory.slice(0, -1) // exclude last added
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      addChatMsg('bot', data.response);
+      conversationHistory.push({ role: 'model', content: data.response });
+
+    } catch (err) {
+      addChatMsg('bot', '💥 RoastBot crashed. Even AIs need therapy sometimes.');
+    } finally {
+      document.getElementById('chatSendBtn').disabled = false;
+      input.focus();
+    }
+  }
+
+  function addChatMsg(role, text) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // ── Share ──────────────────────────────────────────────
+  function shareRoast() {
+    if (!currentResult) return;
+    const text = `🔥 RoastBot 3000 roasted my idea!\n\n💡 Idea: "${currentIdea}"\n📊 Score: ${currentResult.score}/10 — ${currentResult.score_label}\n\n"${currentResult.roast}"\n\n🧠 Tip: ${currentResult.survival_tip}`;
+    navigator.clipboard.writeText(text).then(() => showToast('✅ Roast copied to clipboard!'));
+  }
+
+  // ── Reset ──────────────────────────────────────────────
+  function resetAll() {
+    document.getElementById('ideaInput').value = '';
+    document.getElementById('charCount').textContent = '0';
+    document.getElementById('resultCard').classList.remove('active');
+    document.getElementById('chatSection').classList.remove('active');
+    document.getElementById('resetBtn').classList.remove('active');
+    currentIdea = '';
+    conversationHistory = [];
+    currentResult = null;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Utils ──────────────────────────────────────────────
+  function setLoading(on) {
+    document.getElementById('loading').classList.toggle('active', on);
+    document.getElementById('roastBtn').disabled = on;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
