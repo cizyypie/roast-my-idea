@@ -86,7 +86,7 @@ RoastBot is **fast, fun, and ruthlessly honest** — lowering the barrier to ide
 ### AI
 | Configuration | Value | Reason |
 |---|---|---|
-| **Model** | `gemini-2.0-flash` | Fast response, higher free quota |
+| **Model** | `gemini-2.5-flash` | Fast response, higher free quota |
 | **Temperature** | `0.9` | High creativity for varied roast styles |
 | **topP** | `0.95` | Diverse token sampling |
 | **topK** | `40` | Balanced vocabulary selection |
@@ -111,6 +111,8 @@ roast-my-idea/
 ├── frontend/
 │   └── index.html         # Complete single-file frontend
 ├── .gitignore
+├── 1.png                  # UI preview
+├── 2.png                  # UI preview
 └── README.md
 ```
 [1.png] [2.png] [3.png]
@@ -297,7 +299,6 @@ Continue the conversation about the idea.
 - [ ] Idea history — save and revisit past roasts
 - [ ] Shareable roast cards with generated images
 - [ ] Side-by-side idea comparison mode
-- [ ] "Pivot suggester" — auto-generate 3 variations of your idea
 - [ ] Weekly idea challenge with community voting
 
 ---
