@@ -313,3 +313,5 @@ Stack: Node.js · Express · Gemini AI · Vanilla JS
 ## 📄 License
 
 MIT License — do whatever you want with it, just don't blame me if your idea gets destroyed 🔥
+
+*note: I'm hoping to use Vercel or a similar platform, but time is limited and I've never used it before.
