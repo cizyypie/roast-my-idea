@@ -115,7 +115,7 @@ roast-my-idea/
 ├── 2.png                  # UI preview
 └── README.md
 ```
-[1.png] [2.png] [3.png]
+
 ---
 
 ## 🚀 How to Use It
