@@ -7,13 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  }),
-);
+app.use(cors());
 app.use(express.json());
 app.use(express.static("../frontend"));
 
@@ -34,8 +28,8 @@ YOUR RESPONSE FORMAT — always respond in this EXACT JSON structure:
   "roast": "Your main roast/critique — 2-3 punchy sentences with personality",
   "score": <integer 1-10 based on idea quality>,
   "score_label": "One funny label for the score (e.g. 'Dead on Arrival', 'Smells Like Pivot Needed', 'Actually Not Terrible', 'Shut Up and Take My Money')",
-  "strengths": ["strength 1 (max 10 words)", "strength 2 (max 10 words)"],
-"weaknesses": ["weakness 1 (max 10 words)", "weakness 2 (max 10 words)"],
+  "strengths": ["strength 1", "strength 2"],
+  "weaknesses": ["weakness 1", "weakness 2"],
   "competitors": [
     {"name": "Competitor Name", "url": "https://example.com", "note": "one line why they're relevant"},
     {"name": "Competitor Name 2", "url": "https://example.com", "note": "one line why they're relevant"}
@@ -50,8 +44,7 @@ SCORING GUIDE:
 6-7: Decent, reluctant approval
 8-10: Actually good, impressed but still a little snarky
 
-IMPORTANT: Return ONLY valid JSON, no markdown, no backticks, no extra text. 
-CRITICAL: Keep each field SHORT and concise. Total response must be under 400 tokens. Never truncate the JSON — always close all brackets properly.`;
+IMPORTANT: Return ONLY valid JSON. No markdown, no backticks, no extra text. Be very concise — max 15 words per field. Never leave a string unterminated. Always close every bracket and brace.`;
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
@@ -103,11 +96,12 @@ app.post("/api/roast", async (req, res) => {
       const cleaned = rawText
         .replace(/```json|```/gi, "")
         .replace(/^[^{]*/, "")
-        .replace(/[^}]*$/, "")
         .trim();
 
-      if (!cleaned) throw new Error("Empty response from Gemini");
-      parsed = JSON.parse(cleaned);
+      const fixedJson = cleaned.endsWith("}") ? cleaned : cleaned + '"}';
+      parsed = JSON.parse(fixedJson);
+      
+      // parsed = JSON.parse(cleaned);
     } catch (parseErr) {
       console.error("JSON parse error:", parseErr);
       return res.status(500).json({
@@ -184,4 +178,81 @@ app.listen(PORT, () => {
    POST /api/roast
    POST /api/followup
   `);
+});
+
+// Pivot Generator endpoint
+app.post("/api/pivot", async (req, res) => {
+  const { idea, roast_result } = req.body;
+
+  if (!idea) {
+    return res.status(400).json({ error: "No idea provided to pivot from." });
+  }
+
+  const PIVOT_PROMPT = `You are a creative startup pivot strategist. Given a failed or mediocre idea and its critique, generate 3 smart pivot alternatives.
+
+Each pivot should take the CORE insight of the original idea but reframe it into a better market, audience, or approach.
+
+Respond ONLY in this EXACT JSON format, no markdown, no backticks:
+{
+  "pivots": [
+    {
+      "name": "Catchy pivot name (3-5 words)",
+      "tagline": "One punchy sentence describing it",
+      "target": "Specific target user",
+      "why_better": "One sentence on why this beats the original",
+      "score_prediction": 7
+    }
+  ],
+  "pivot_summary": "One witty sentence on why pivoting was the right call"
+}
+
+Make all 3 pivots genuinely different from each other — different audiences, angles, business models. Keep each field under 15 words. Total response under 500 tokens.`;
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: PIVOT_PROMPT,
+      generationConfig: {
+        temperature: 1.0,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 2048,
+      },
+    });
+
+    const prompt = `Original idea: "${idea}"
+Score: ${roast_result?.score || "N/A"}/10
+Weakness: ${roast_result?.weaknesses?.[0] || "Not specified"}
+Tip: ${roast_result?.survival_tip || "Not specified"}
+Generate 3 pivot ideas.`;
+
+    const result = await model.generateContent(prompt);
+    const rawText = result.response.text().trim();
+
+    let parsed;
+try {
+  const start = rawText.indexOf('{');
+  const end = rawText.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('No JSON found');
+  const cleaned = rawText.slice(start, end + 1);
+  parsed = JSON.parse(cleaned);
+} catch (parseErr) {
+  console.error("JSON parse error:", parseErr);
+  return res.status(500).json({
+    error: "RoastBot had a malfunction. Try again!",
+    raw: rawText,
+  });
+}
+
+    res.json({ success: true, idea, pivots: parsed });
+  } catch (err) {
+    console.error("Pivot API error:", err);
+    const isQuota = err.message?.includes("429");
+    res.status(isQuota ? 429 : 500).json({
+      error: isQuota
+        ? "⏳ Rate limit hit. Wait a moment and try again."
+        : "Pivot generator crashed.",
+      details: err.message,
+    });
+  }
 });

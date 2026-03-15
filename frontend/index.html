@@ -525,6 +525,56 @@
     .btn-reset.active { display: block; }
     .btn-reset:hover { border-color: var(--text); color: var(--text); }
 
+
+    /* ── Pivot Section ─────────────────────────────────── */
+    .pivot-section { display: none; margin-top: 16px; animation: slide-up 0.4s ease; }
+    .pivot-section.active { display: block; }
+
+    .btn-pivot {
+      width: 100%;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 1px dashed var(--fire2);
+      color: var(--fire2);
+      padding: 14px;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-size: 20px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-pivot:hover { background: rgba(255,69,0,0.08); border-color: var(--fire); color: var(--fire); box-shadow: 0 0 20px rgba(255,69,0,0.15); }
+    .btn-pivot:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .pivot-results { display: none; margin-top: 12px; animation: slide-up 0.4s ease; }
+    .pivot-results.active { display: block; }
+
+    .pivot-summary {
+      text-align: center; font-size: 13px; color: var(--muted); font-style: italic;
+      margin-bottom: 14px; padding: 10px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--surface);
+    }
+
+    .pivot-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 640px) { .pivot-cards { grid-template-columns: 1fr; } }
+
+    .pivot-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-top: 3px solid var(--fire2); border-radius: 12px; padding: 18px;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: slide-up 0.4s ease backwards;
+    }
+    .pivot-card:hover { border-color: var(--fire); transform: translateY(-3px); }
+    .pivot-card:nth-child(1) { animation-delay: 0.05s; border-top-color: var(--fire); }
+    .pivot-card:nth-child(2) { animation-delay: 0.15s; border-top-color: var(--fire2); }
+    .pivot-card:nth-child(3) { animation-delay: 0.25s; border-top-color: var(--fire3); }
+
+    .pivot-card-name { font-family: var(--font-display); font-size: 18px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+    .pivot-card-tagline { font-size: 13px; color: #bbb; line-height: 1.5; margin-bottom: 10px; }
+    .pivot-card-meta { font-size: 11px; font-family: var(--font-mono); color: var(--muted); margin-bottom: 4px; }
+    .pivot-card-meta span { color: var(--fire2); }
+    .pivot-card-score { display: inline-block; margin-top: 10px; background: rgba(255,123,0,0.1); border: 1px solid rgba(255,123,0,0.2); color: var(--fire2); font-family: var(--font-mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+
     /* ── Toast ─────────────────────────────────────────── */
     .toast {
       position: fixed;
@@ -647,6 +697,16 @@
 
   </div>
 
+
+  <!-- Pivot Generator -->
+  <div class="pivot-section" id="pivotSection">
+    <button class="btn-pivot" id="pivotBtn" onclick="generatePivots()">🔄 GENERATE PIVOT IDEAS</button>
+    <div class="pivot-results" id="pivotResults">
+      <div class="pivot-summary" id="pivotSummary"></div>
+      <div class="pivot-cards" id="pivotCards"></div>
+    </div>
+  </div>
+
   <!-- Chat Follow-up -->
   <div class="chat-section" id="chatSection">
     <div class="chat-header">
@@ -689,6 +749,8 @@
 
     setLoading(true);
     document.getElementById('resultCard').classList.remove('active');
+    document.getElementById('pivotSection').classList.remove('active');
+    document.getElementById('pivotResults').classList.remove('active');
     document.getElementById('chatSection').classList.remove('active');
     document.getElementById('resetBtn').classList.remove('active');
 
@@ -757,6 +819,9 @@
     document.getElementById('verdictText').innerHTML = `<strong>Final Verdict:</strong> ${r.verdict}`;
 
     document.getElementById('resultCard').classList.add('active');
+    document.getElementById('pivotSection').classList.add('active');
+    document.getElementById('pivotResults').classList.remove('active');
+    document.getElementById('pivotBtn').disabled = false;
     document.getElementById('chatSection').classList.add('active');
     document.getElementById('resetBtn').classList.add('active');
     document.getElementById('chatMessages').innerHTML = '';
@@ -840,6 +905,52 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
   }
+
+  // ── Pivot Generator ────────────────────────────────────
+  async function generatePivots() {
+    if (!currentIdea || !currentResult) return;
+
+    const btn = document.getElementById('pivotBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ GENERATING PIVOTS...';
+
+    try {
+      const res = await fetch(`${API_BASE}/pivot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea: currentIdea, roast_result: currentResult })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      displayPivots(data.pivots);
+    } catch (err) {
+      showToast('❌ ' + (err.message || 'Pivot generator crashed'));
+      btn.disabled = false;
+      btn.textContent = '🔄 GENERATE PIVOT IDEAS';
+    }
+  }
+
+  function displayPivots(data) {
+    document.getElementById('pivotSummary').textContent = data.pivot_summary;
+
+    const scoreColors = ['var(--fire)', 'var(--fire2)', 'var(--fire3)', 'var(--green)'];
+    document.getElementById('pivotCards').innerHTML = data.pivots.map((p, i) => `
+      <div class="pivot-card">
+        <div class="pivot-card-name">${p.name}</div>
+        <div class="pivot-card-tagline">${p.tagline}</div>
+        <div class="pivot-card-meta">🎯 Target: <span>${p.target}</span></div>
+        <div class="pivot-card-meta">✅ Why better: <span>${p.why_better}</span></div>
+        <div class="pivot-card-score">Predicted Score: ${p.score_prediction}/10</div>
+      </div>
+    `).join('');
+
+    document.getElementById('pivotResults').classList.add('active');
+    document.getElementById('pivotBtn').textContent = '🔄 REGENERATE PIVOTS';
+    document.getElementById('pivotBtn').disabled = false;
+    document.getElementById('pivotResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
 </script>
 </body>
 </html>
